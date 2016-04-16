@@ -47,132 +47,138 @@ public class SendActivity extends AppCompatActivity {
     @Bind(R.id.cbox_okolona_sreda)
     CheckBox cBoxOkolnaSreda;
 
+    private Firebase ref;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_send);
         ButterKnife.bind(this);
 
-
+        Firebase.setAndroidContext(this);
+        ref = new Firebase(Config.FIREBASE_URL);
 
         btnSend.setOnClickListener(new View.OnClickListener() {
-
             @Override
             public void onClick(View v) {
-                boolean fl = true;
+                makeFireBase();
+                sendEmail();
+            }
+        });
 
-                String location = edtTxtLocation.getText().toString();
-                String description = edtTxtDescription.getText().toString();
+    }
 
-                if (location.isEmpty()) {
-                    Toast.makeText(getApplicationContext(), "NO Location",
-                            Toast.LENGTH_LONG).show();
-                    fl = false;
-                }
-                if (description.isEmpty()) {
-                    Toast.makeText(getApplicationContext(), "NO TEXT",
-                            Toast.LENGTH_LONG).show();
-                    fl = false;
-                }
-                if (!cBoxGorskoto.isChecked() &&
-                        !cBoxgrajdanska.isChecked() &&
-                        !cBoxAnimalProtected.isChecked() &&
-                        !cBoxOkolnaSreda.isChecked()) {
-                    Toast.makeText(getApplicationContext(), "NO CHECK",
-                            Toast.LENGTH_LONG).show();
-                    fl = false;
-                }
+    private void sendEmail() {
 
-                if (fl) {
-                    Toast.makeText(getApplicationContext(), "send mail",
-                            Toast.LENGTH_LONG).show();
+        boolean fl = true;
+
+        String location = edtTxtLocation.getText().toString();
+        String description = edtTxtDescription.getText().toString();
+
+        if (location.isEmpty()) {
+            Toast.makeText(getApplicationContext(), "NO Location",
+                    Toast.LENGTH_LONG).show();
+            fl = false;
+        }
+        if (description.isEmpty()) {
+            Toast.makeText(getApplicationContext(), "NO TEXT",
+                    Toast.LENGTH_LONG).show();
+            fl = false;
+        }
+        if (!cBoxGorskoto.isChecked() &&
+                !cBoxgrajdanska.isChecked() &&
+                !cBoxAnimalProtected.isChecked() &&
+                !cBoxOkolnaSreda.isChecked()) {
+            Toast.makeText(getApplicationContext(), "NO CHECK",
+                    Toast.LENGTH_LONG).show();
+            fl = false;
+        }
+
+        if (fl) {
+            Toast.makeText(getApplicationContext(), "send mail",
+                    Toast.LENGTH_LONG).show();
 
 //                    Intent emailIntent = new Intent((Intent.ACTION_SEND));
 
-                    Intent emailIntent = new Intent(Intent.ACTION_SENDTO);
+            Intent emailIntent = new Intent(Intent.ACTION_SENDTO);
 
-                    String recipient = "";
-                    if (cBoxGorskoto.isChecked()) {
-                        recipient = recipient + " pkatrankiev@abv.bg,";
-                    }
-                    if (cBoxAnimalProtected.isChecked()) {
-                        recipient = recipient + " pkatrankiev@gmail.com,";
-                    }
-                    if (cBoxOkolnaSreda.isChecked()) {
-                        recipient = recipient + " tapotiata@abv.bg,";
-                    }
-                    if (cBoxgrajdanska.isChecked()) {
-                        recipient = recipient + " sity_teh@abv.bg,";
-                    }
-                    String text = location + "\n" + description;
+            String recipient = "";
+            if (cBoxGorskoto.isChecked()) {
+                recipient = recipient + " pkatrankiev@abv.bg,";
+            }
+            if (cBoxAnimalProtected.isChecked()) {
+                recipient = recipient + " pkatrankiev@gmail.com,";
+            }
+            if (cBoxOkolnaSreda.isChecked()) {
+                recipient = recipient + " tapotiata@abv.bg,";
+            }
+            if (cBoxgrajdanska.isChecked()) {
+                recipient = recipient + " sity_teh@abv.bg,";
+            }
+            String text = location + "\n" + description;
 
-                    emailIntent.setData(Uri.parse("mailto:" + recipient));
+            emailIntent.setData(Uri.parse("mailto:" + recipient));
 //                    emailIntent.putExtra(Intent.EXTRA_STREAM, );
-                    emailIntent.putExtra(Intent.EXTRA_SUBJECT, "imate mail");
-                    emailIntent.putExtra(Intent.EXTRA_TEXT, text);
+            emailIntent.putExtra(Intent.EXTRA_SUBJECT, "imate mail");
+            emailIntent.putExtra(Intent.EXTRA_TEXT, text);
 
-                    try {
-                        startActivity(Intent.createChooser(emailIntent, "Choose an Email client :"));
-                    } catch (android.content.ActivityNotFoundException ex) {
-                        Toast.makeText(getApplicationContext(), "No email clients installed.", Toast.LENGTH_SHORT).show();
-                    }
+            try {
+                startActivity(Intent.createChooser(emailIntent, "Choose an Email client :"));
+            } catch (android.content.ActivityNotFoundException ex) {
+                Toast.makeText(getApplicationContext(), "No email clients installed.", Toast.LENGTH_SHORT).show();
+            }
 
+        }
+    }
+
+
+    public void makeFireBase() {
+
+
+
+        Events events = new Events();
+        events.setImg(decodeImage());
+        events.setLocation(edtTxtLocation.getText().toString());
+        events.setDescription(edtTxtDescription.getText().toString());
+
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd_HHmmss");
+        String currentDateandTime = sdf.format(new Date());
+
+
+        ref.child(currentDateandTime).setValue(events);
+
+        ref.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot snapshot) {
+                for (DataSnapshot postSnapshot : snapshot.getChildren()) {
+                    //Getting the data from snapshot
+                    Events events = postSnapshot.getValue(Events.class);
+
+
+                    //Adding it to a string
+                    String recievingString = events.getImg();
+                    byte[] decodedString = Base64.decode(recievingString, Base64.DEFAULT);
+                    Bitmap decodedByte = BitmapFactory.decodeByteArray(decodedString, 0, decodedString.length);
+                    imgRecieve.setImageBitmap(decodedByte);
+                    //Displaying it on textview
                 }
             }
-        });
 
-        Firebase.setAndroidContext(this);
-        final Firebase ref = new Firebase(Config.FIREBASE_URL);
-
-        btnSend.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View v) {
-
-
-
-                Bitmap bmp = BitmapFactory.decodeResource(getResources(), R.drawable.ic_launcher);
-                ByteArrayOutputStream bos = new ByteArrayOutputStream();
-                bmp.compress(Bitmap.CompressFormat.PNG, 100, bos);
-                byte[] data = bos.toByteArray();
-                String base64 = Base64.encodeToString(data, Base64.DEFAULT);
-                Events events = new Events();
-                events.setImg(base64);
-                events.setLocation(edtTxtLocation.getText().toString());
-                events.setDescription(edtTxtDescription.getText().toString());
-
-                SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd_HHmmss");
-                String currentDateandTime = sdf.format(new Date());
-
-                ref.child(currentDateandTime).setValue(events);
-
-                ref.addValueEventListener(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(DataSnapshot snapshot) {
-                        for (DataSnapshot postSnapshot : snapshot.getChildren()) {
-                            //Getting the data from snapshot
-                            Events events = postSnapshot.getValue(Events.class);
-
-
-                            //Adding it to a string
-                            String recievingString = events.getImg();
-                            byte[] decodedString = Base64.decode(recievingString, Base64.DEFAULT);
-                            Bitmap decodedByte = BitmapFactory.decodeByteArray(decodedString, 0, decodedString.length);
-                            imgRecieve.setImageBitmap(decodedByte);
-                            //Displaying it on textview
-                        }
-                    }
-
-                    @Override
-                    public void onCancelled(FirebaseError firebaseError) {
-                        System.out.println("The read failed: " + firebaseError.getMessage());
-                    }
-                });
-
-
-
-
+            public void onCancelled(FirebaseError firebaseError) {
+                System.out.println("The read failed: " + firebaseError.getMessage());
             }
         });
 
+
+    }
+
+
+    public String decodeImage() {
+        Bitmap bmp = BitmapFactory.decodeResource(getResources(), R.drawable.ic_launcher);
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        bmp.compress(Bitmap.CompressFormat.PNG, 100, bos);
+        byte[] data = bos.toByteArray();
+        return Base64.encodeToString(data, Base64.DEFAULT);
     }
 }
