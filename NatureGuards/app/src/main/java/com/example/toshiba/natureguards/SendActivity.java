@@ -1,7 +1,10 @@
 package com.example.toshiba.natureguards;
 
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.net.Uri;
+import android.os.Environment;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Base64;
@@ -10,11 +13,13 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.Toast;
 
 import com.firebase.client.*;
 
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -47,6 +52,74 @@ public class SendActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_send);
         ButterKnife.bind(this);
+
+
+
+        btnSend.setOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View v) {
+                boolean fl = true;
+
+                String location = edtTxtLocation.getText().toString();
+                String description = edtTxtDescription.getText().toString();
+
+                if (location.isEmpty()) {
+                    Toast.makeText(getApplicationContext(), "NO Location",
+                            Toast.LENGTH_LONG).show();
+                    fl = false;
+                }
+                if (description.isEmpty()) {
+                    Toast.makeText(getApplicationContext(), "NO TEXT",
+                            Toast.LENGTH_LONG).show();
+                    fl = false;
+                }
+                if (!cBoxGorskoto.isChecked() &&
+                        !cBoxgrajdanska.isChecked() &&
+                        !cBoxAnimalProtected.isChecked() &&
+                        !cBoxOkolnaSreda.isChecked()) {
+                    Toast.makeText(getApplicationContext(), "NO CHECK",
+                            Toast.LENGTH_LONG).show();
+                    fl = false;
+                }
+
+                if (fl) {
+                    Toast.makeText(getApplicationContext(), "send mail",
+                            Toast.LENGTH_LONG).show();
+
+//                    Intent emailIntent = new Intent((Intent.ACTION_SEND));
+
+                    Intent emailIntent = new Intent(Intent.ACTION_SENDTO);
+
+                    String recipient = "";
+                    if (cBoxGorskoto.isChecked()) {
+                        recipient = recipient + " pkatrankiev@abv.bg,";
+                    }
+                    if (cBoxAnimalProtected.isChecked()) {
+                        recipient = recipient + " pkatrankiev@gmail.com,";
+                    }
+                    if (cBoxOkolnaSreda.isChecked()) {
+                        recipient = recipient + " tapotiata@abv.bg,";
+                    }
+                    if (cBoxgrajdanska.isChecked()) {
+                        recipient = recipient + " sity_teh@abv.bg,";
+                    }
+                    String text = location + "\n" + description;
+
+                    emailIntent.setData(Uri.parse("mailto:" + recipient));
+//                    emailIntent.putExtra(Intent.EXTRA_STREAM, );
+                    emailIntent.putExtra(Intent.EXTRA_SUBJECT, "imate mail");
+                    emailIntent.putExtra(Intent.EXTRA_TEXT, text);
+
+                    try {
+                        startActivity(Intent.createChooser(emailIntent, "Choose an Email client :"));
+                    } catch (android.content.ActivityNotFoundException ex) {
+                        Toast.makeText(getApplicationContext(), "No email clients installed.", Toast.LENGTH_SHORT).show();
+                    }
+
+                }
+            }
+        });
 
         Firebase.setAndroidContext(this);
         final Firebase ref = new Firebase(Config.FIREBASE_URL);
