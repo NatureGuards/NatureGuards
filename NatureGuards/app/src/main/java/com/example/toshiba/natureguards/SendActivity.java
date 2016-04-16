@@ -5,9 +5,11 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Environment;
+import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Base64;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CheckBox;
@@ -20,14 +22,18 @@ import com.firebase.client.*;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
 
 public class SendActivity extends AppCompatActivity {
 
+    private static final String TAG = SendActivity.class.getSimpleName();
     @Bind(R.id.edt_txt_location)
     EditText edtTxtLocation;
     @Bind(R.id.edt_txt_description)
@@ -46,13 +52,21 @@ public class SendActivity extends AppCompatActivity {
     CheckBox cBoxgrajdanska;
     @Bind(R.id.cbox_okolona_sreda)
     CheckBox cBoxOkolnaSreda;
+    private static final int CAPTURE_IMAGE_ACTIVITY_REQUEST_CODE = 100;
+    private Bitmap imgBitmap;
+    List<Events> event = new ArrayList<>();
+
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_send);
         ButterKnife.bind(this);
-
+                Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+                if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
+                    startActivityForResult(takePictureIntent, CAPTURE_IMAGE_ACTIVITY_REQUEST_CODE);
+                }
 
 
         btnSend.setOnClickListener(new View.OnClickListener() {
@@ -127,52 +141,61 @@ public class SendActivity extends AppCompatActivity {
         btnSend.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                Log.d(TAG, "send clicked !");
+                if(imgBitmap != null) {
+                    Log.d(TAG, "Bitmap is not null !");
+                    ByteArrayOutputStream bos = new ByteArrayOutputStream();
+                    imgBitmap.compress(Bitmap.CompressFormat.PNG, 100, bos);
+                    byte[] data = bos.toByteArray();
+                    String base64 = Base64.encodeToString(data, Base64.DEFAULT);
+                    final Events events = new Events();
+                    events.setImg(base64);
+                    events.setLocation(edtTxtLocation.getText().toString());
+                    events.setDescription(edtTxtDescription.getText().toString());
 
+                    SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd_HHmmss");
+                    String currentDateandTime = sdf.format(new Date());
 
+                    ref.child(currentDateandTime).setValue(events);
 
-                Bitmap bmp = BitmapFactory.decodeResource(getResources(), R.drawable.ic_launcher);
-                ByteArrayOutputStream bos = new ByteArrayOutputStream();
-                bmp.compress(Bitmap.CompressFormat.PNG, 100, bos);
-                byte[] data = bos.toByteArray();
-                String base64 = Base64.encodeToString(data, Base64.DEFAULT);
-                Events events = new Events();
-                events.setImg(base64);
-                events.setLocation(edtTxtLocation.getText().toString());
-                events.setDescription(edtTxtDescription.getText().toString());
+                    ref.addValueEventListener(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(DataSnapshot snapshot) {
+                            Log.d(TAG, "onDataChange() " + snapshot);
+                            for (DataSnapshot postSnapshot : snapshot.getChildren()) {
+                                //Getting the data from snapshot
+                                event.add(postSnapshot.getValue(Events.class));
+                                //Adding it to a string
+                                String description = events.getDescription();
+                                String recievingString = events.getImg();
+                                byte[] decodedString = Base64.decode(recievingString, Base64.DEFAULT);
+                                Bitmap bmp = BitmapFactory.decodeByteArray(decodedString, 0, decodedString.length);
+                                imgRecieve.setImageBitmap(bmp);
+                                //Displaying it on textview
 
-                SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd_HHmmss");
-                String currentDateandTime = sdf.format(new Date());
-
-                ref.child(currentDateandTime).setValue(events);
-
-                ref.addValueEventListener(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(DataSnapshot snapshot) {
-                        for (DataSnapshot postSnapshot : snapshot.getChildren()) {
-                            //Getting the data from snapshot
-                            Events events = postSnapshot.getValue(Events.class);
-
-
-                            //Adding it to a string
-                            String recievingString = events.getImg();
-                            byte[] decodedString = Base64.decode(recievingString, Base64.DEFAULT);
-                            Bitmap decodedByte = BitmapFactory.decodeByteArray(decodedString, 0, decodedString.length);
-                            imgRecieve.setImageBitmap(decodedByte);
-                            //Displaying it on textview
+                            }
                         }
-                    }
 
-                    @Override
-                    public void onCancelled(FirebaseError firebaseError) {
-                        System.out.println("The read failed: " + firebaseError.getMessage());
-                    }
-                });
-
-
+                        @Override
+                        public void onCancelled(FirebaseError firebaseError) {
+                            Log.e(TAG, "onCancelled() " + firebaseError.getMessage());
+                            System.out.println("The read failed: " + firebaseError.getMessage());
+                        }
+                    });
 
 
+                }
             }
         });
 
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == CAPTURE_IMAGE_ACTIVITY_REQUEST_CODE && resultCode == RESULT_OK) {
+            Bundle extras = data.getExtras();
+            imgBitmap = (Bitmap) data.getExtras().get("data");
+            imgSend.setImageBitmap(imgBitmap);
+        }
     }
 }
