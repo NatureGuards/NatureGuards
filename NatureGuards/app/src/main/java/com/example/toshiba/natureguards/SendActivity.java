@@ -5,6 +5,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Environment;
+import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Base64;
@@ -20,6 +21,7 @@ import com.firebase.client.*;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -46,13 +48,17 @@ public class SendActivity extends AppCompatActivity {
     CheckBox cBoxgrajdanska;
     @Bind(R.id.cbox_okolona_sreda)
     CheckBox cBoxOkolnaSreda;
+    private static final int CAPTURE_IMAGE_ACTIVITY_REQUEST_CODE = 100;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_send);
         ButterKnife.bind(this);
-
+                Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+                if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
+                    startActivityForResult(takePictureIntent, CAPTURE_IMAGE_ACTIVITY_REQUEST_CODE);
+                }
 
 
         btnSend.setOnClickListener(new View.OnClickListener() {
@@ -128,11 +134,30 @@ public class SendActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
 
+                String mCurrentPhotoPath;
+
+                private File createImageFile() throws IOException {
+                    // Create an image file name
+                    String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+                    String imageFileName = "JPEG_" + timeStamp + "_";
+                    File storageDir = Environment.getExternalStoragePublicDirectory(
+                            Environment.DIRECTORY_PICTURES);
+                    File image = File.createTempFile(
+                            imageFileName,  /* prefix */
+                            ".jpg",         /* suffix */
+                            storageDir      /* directory */
+                    );
+
+                    // Save a file: path for use with ACTION_VIEW intents
+                    mCurrentPhotoPath = "file:" + image.getAbsolutePath();
+                    return image;
+                }
 
 
-                Bitmap bmp = BitmapFactory.decodeResource(getResources(), R.drawable.ic_launcher);
+
+                Bitmap bmp = BitmapFactory.decodeResource(getResources(), R.id.img_send );
                 ByteArrayOutputStream bos = new ByteArrayOutputStream();
-                bmp.compress(Bitmap.CompressFormat.PNG, 100, bos);
+                bmp.compress(Bitmap.CompressFormat.JPEG, 100, bos);
                 byte[] data = bos.toByteArray();
                 String base64 = Base64.encodeToString(data, Base64.DEFAULT);
                 Events events = new Events();
@@ -174,5 +199,13 @@ public class SendActivity extends AppCompatActivity {
             }
         });
 
+    }
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == CAPTURE_IMAGE_ACTIVITY_REQUEST_CODE && resultCode == RESULT_OK) {
+            Bundle extras = data.getExtras();
+            Bitmap imageBitmap = (Bitmap) extras.get("data");
+            imgSend.setImageBitmap(imageBitmap);
+        }
     }
 }

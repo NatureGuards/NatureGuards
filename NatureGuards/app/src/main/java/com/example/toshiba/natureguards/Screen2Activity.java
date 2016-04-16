@@ -26,15 +26,13 @@ import static com.example.toshiba.natureguards.R.drawable.blue_forest;
  */
 public class Screen2Activity extends AppCompatActivity implements View.OnClickListener {
 
-    private static final int CAMERA_REQUEST = 10;
+
 
     @Bind(R.id.btn_send_signal)
     Button btnSendSignal;
     @Bind(R.id.btn_preview)
     Button btnPreview;
-    @Bind(R.id.img_captured)
-    ImageView imgCaptured;
-    private static final int CAPTURE_IMAGE_ACTIVITY_REQUEST_CODE = 100;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,21 +51,13 @@ public class Screen2Activity extends AppCompatActivity implements View.OnClickLi
 
                 break;
             case R.id.btn_send_signal:
-                Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-                if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
-                    startActivityForResult(takePictureIntent, CAPTURE_IMAGE_ACTIVITY_REQUEST_CODE);
-                }
+                Intent intent = new Intent(this, SendActivity.class);
+                startActivity(intent);
+
                 break;
         }
     }
 
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == CAPTURE_IMAGE_ACTIVITY_REQUEST_CODE && resultCode == RESULT_OK) {
-            Bundle extras = data.getExtras();
-            Bitmap imageBitmap = (Bitmap) extras.get("data");
-            imgCaptured.setImageBitmap(imageBitmap);
-        }
-    }
+
 
 }
