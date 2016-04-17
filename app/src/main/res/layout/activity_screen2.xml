@@ -3,15 +3,16 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="horizontal"
-    android:background="@drawable/blue_forest">
+    android:orientation="horizontal">
 
     <Button
+        android:id="@+id/btn_preview"
         android:layout_width="0dp"
         android:layout_height="50dp"
         android:layout_weight="1"
         android:text="Preview"/>
     <Button
+        android:id="@+id/btn_send_signal"
         android:layout_width="0dp"
         android:layout_height="50dp"
         android:layout_weight="1"
