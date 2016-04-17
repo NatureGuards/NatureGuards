@@ -9,62 +9,98 @@
         android:id="@+id/img_send"
         android:layout_width="match_parent"
         android:layout_height="256dp"
-        android:src="@drawable/ic_launcher"/>
-
-    <EditText
-        android:id="@+id/edt_txt_location"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="location"
-        android:textColor="@android:color/tertiary_text_dark"/>
-    <EditText
-        android:id="@+id/edt_txt_description"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="description"
-        android:textColor="@android:color/tertiary_text_dark"/>
+        android:layout_margin="16dp"
+        android:scaleType="fitXY"
+        android:src="@drawable/ic_launcher" />
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:layout_marginTop="16dp">
-        <CheckBox
-            android:id="@+id/cbox_gorskoto"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Служба по горите"/>
-        <CheckBox
-            android:id="@+id/cbox_grajdanska"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Гражданска Защита"/>
+        android:orientation="horizontal">
 
+        <Button
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:background="@drawable/ic_location_on_black_24dp" />
+
+        <EditText
+            android:id="@+id/edt_txt_location"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="location"
+            android:textColor="@android:color/tertiary_text_dark" />
     </LinearLayout>
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:layout_marginTop="8dp">
-        <CheckBox
-            android:id="@+id/cbox_okolona_sreda"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Служба Околна Среда"/>
-        <CheckBox
-            android:id="@+id/cbox_animals_protected"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Защита на животните"/>
+        android:orientation="horizontal">
 
+        <ImageView
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:src="@drawable/ic_message_black_24dp" />
+
+        <EditText
+            android:id="@+id/edt_txt_description"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="description"
+            android:textColor="@android:color/tertiary_text_dark" />
     </LinearLayout>
+
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="4dp"
+        android:orientation="horizontal">
+
+        <RadioGroup
+            android:id="@+id/first_r_gr"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+
+            <RadioButton
+                android:id="@+id/cbox_gorskoto"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Служба по горите" />
+
+            <RadioButton
+                android:id="@+id/cbox_grajdanska"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Гражданска Защита" />
+        </RadioGroup>
+
+
+        <RadioGroup
+            android:id="@+id/second_r_gr"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+
+            <RadioButton
+                android:id="@+id/cbox_okolona_sreda"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Служба Околна Среда" />
+
+            <RadioButton
+                android:id="@+id/cbox_animals_protected"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Защита на животните" />
+        </RadioGroup>
+    </LinearLayout>
+
+
     <Button
         android:id="@+id/btn_send"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Send"
-        android:layout_marginTop="16dp"/>
-
+        android:layout_marginTop="8dp"
+        android:text="Send" />
 
 
 </LinearLayout>

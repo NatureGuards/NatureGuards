@@ -15,6 +15,7 @@ import com.firebase.client.FirebaseError;
 import com.firebase.client.ValueEventListener;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import butterknife.Bind;
@@ -33,6 +34,7 @@ public class PreviewActivity extends AppCompatActivity {
         setContentView(R.layout.activity_preview2);
         ButterKnife.bind(this);
         recView.setLayoutManager(new LinearLayoutManager(this));
+        Collections.reverse(event);
         myAdapter = new MyAdapter(event);
         recView.setAdapter(myAdapter);
 
