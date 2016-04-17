@@ -202,6 +202,7 @@ public class SendActivity extends AppCompatActivity {
         }
     }
 
+    
     private boolean isNetworkAvailable() {
         ConnectivityManager connectivityManager
                 = (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE);
