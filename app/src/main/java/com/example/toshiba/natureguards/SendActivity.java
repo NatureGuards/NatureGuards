@@ -42,8 +42,8 @@ public class SendActivity extends AppCompatActivity {
     Button btnSend;
     @Bind(R.id.img_send)
     ImageView imgSend;
-    @Bind(R.id.img_recieve)
-    ImageView imgRecieve;
+//    @Bind(R.id.img_recieve)
+//    ImageView imgRecieve;
     @Bind(R.id.cbox_animals_protected)
     CheckBox cBoxAnimalProtected;
     @Bind(R.id.cbox_gorskoto)
@@ -170,7 +170,7 @@ public class SendActivity extends AppCompatActivity {
                                 String recievingString = events.getImg();
                                 byte[] decodedString = Base64.decode(recievingString, Base64.DEFAULT);
                                 Bitmap bmp = BitmapFactory.decodeByteArray(decodedString, 0, decodedString.length);
-                                imgRecieve.setImageBitmap(bmp);
+//                                imgRecieve.setImageBitmap(bmp);
                                 //Displaying it on textview
 
                             }
