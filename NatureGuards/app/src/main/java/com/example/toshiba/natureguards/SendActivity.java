@@ -3,8 +3,6 @@ package com.example.toshiba.natureguards;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Environment;
 import android.provider.MediaStore;
@@ -20,7 +18,6 @@ import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.firebase.client.*;
-import com.firebase.client.core.Context;
 
 
 import java.io.ByteArrayOutputStream;
@@ -60,15 +57,16 @@ public class SendActivity extends AppCompatActivity {
     List<Events> event = new ArrayList<>();
 
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_send);
         ButterKnife.bind(this);
-        Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-        if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
-            startActivityForResult(takePictureIntent, CAPTURE_IMAGE_ACTIVITY_REQUEST_CODE);
-        }
+                Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+                if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
+                    startActivityForResult(takePictureIntent, CAPTURE_IMAGE_ACTIVITY_REQUEST_CODE);
+                }
 
 
         btnSend.setOnClickListener(new View.OnClickListener() {
@@ -143,51 +141,48 @@ public class SendActivity extends AppCompatActivity {
         btnSend.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (isNetworkAvailable() == false) {
-                    Toast.makeText(getApplicationContext(), "No Network Connection", Toast.LENGTH_LONG).show();
-                } else {
-                    Log.d(TAG, "send clicked !");
-                    if (imgBitmap != null) {
-                        Log.d(TAG, "Bitmap is not null !");
-                        ByteArrayOutputStream bos = new ByteArrayOutputStream();
-                        imgBitmap.compress(Bitmap.CompressFormat.PNG, 100, bos);
-                        byte[] data = bos.toByteArray();
-                        String base64 = Base64.encodeToString(data, Base64.DEFAULT);
-                        final Events events = new Events();
-                        events.setImg(base64);
-                        events.setLocation(edtTxtLocation.getText().toString());
-                        events.setDescription(edtTxtDescription.getText().toString());
+                Log.d(TAG, "send clicked !");
+                if(imgBitmap != null) {
+                    Log.d(TAG, "Bitmap is not null !");
+                    ByteArrayOutputStream bos = new ByteArrayOutputStream();
+                    imgBitmap.compress(Bitmap.CompressFormat.PNG, 100, bos);
+                    byte[] data = bos.toByteArray();
+                    String base64 = Base64.encodeToString(data, Base64.DEFAULT);
+                    final Events events = new Events();
+                    events.setImg(base64);
+                    events.setLocation(edtTxtLocation.getText().toString());
+                    events.setDescription(edtTxtDescription.getText().toString());
 
-                        SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd_HHmmss");
-                        String currentDateandTime = sdf.format(new Date());
+                    SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd_HHmmss");
+                    String currentDateandTime = sdf.format(new Date());
 
-                        ref.child(currentDateandTime).setValue(events);
+                    ref.child(currentDateandTime).setValue(events);
 
-                        ref.addValueEventListener(new ValueEventListener() {
-                            @Override
-                            public void onDataChange(DataSnapshot snapshot) {
-                                Log.d(TAG, "onDataChange() " + snapshot);
-                                for (DataSnapshot postSnapshot : snapshot.getChildren()) {
-                                    //Getting the data from snapshot
-                                    event.add(postSnapshot.getValue(Events.class));
-                                    //Adding it to a string
-                                    String description = events.getDescription();
-                                    String recievingString = events.getImg();
-                                    byte[] decodedString = Base64.decode(recievingString, Base64.DEFAULT);
-                                    Bitmap bmp = BitmapFactory.decodeByteArray(decodedString, 0, decodedString.length);
-                                    imgRecieve.setImageBitmap(bmp);
-                                    //Displaying it on textview
+                    ref.addValueEventListener(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(DataSnapshot snapshot) {
+                            Log.d(TAG, "onDataChange() " + snapshot);
+                            for (DataSnapshot postSnapshot : snapshot.getChildren()) {
+                                //Getting the data from snapshot
+                                event.add(postSnapshot.getValue(Events.class));
+                                //Adding it to a string
+                                String description = events.getDescription();
+                                String recievingString = events.getImg();
+                                byte[] decodedString = Base64.decode(recievingString, Base64.DEFAULT);
+                                Bitmap bmp = BitmapFactory.decodeByteArray(decodedString, 0, decodedString.length);
+                                imgRecieve.setImageBitmap(bmp);
+                                //Displaying it on textview
 
-                                }
                             }
+                        }
 
-                            @Override
-                            public void onCancelled(FirebaseError firebaseError) {
-                                Log.e(TAG, "onCancelled() " + firebaseError.getMessage());
-                                System.out.println("The read failed: " + firebaseError.getMessage());
-                            }
-                        });
-                    }
+                        @Override
+                        public void onCancelled(FirebaseError firebaseError) {
+                            Log.e(TAG, "onCancelled() " + firebaseError.getMessage());
+                            System.out.println("The read failed: " + firebaseError.getMessage());
+                        }
+                    });
+
 
                 }
             }
@@ -202,15 +197,5 @@ public class SendActivity extends AppCompatActivity {
             imgBitmap = (Bitmap) data.getExtras().get("data");
             imgSend.setImageBitmap(imgBitmap);
         }
-
-
-    }
-
-
-    private boolean isNetworkAvailable() {
-        ConnectivityManager connectivityManager
-                = (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE);
-        NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
-        return activeNetworkInfo != null && activeNetworkInfo.isConnected();
     }
 }
