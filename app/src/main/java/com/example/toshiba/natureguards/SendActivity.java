@@ -1,14 +1,18 @@
 package com.example.toshiba.natureguards;
 
+import android.Manifest;
 import android.app.Activity;
 import android.content.ActivityNotFoundException;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Environment;
 import android.os.Handler;
 import android.provider.MediaStore;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Base64;
@@ -67,6 +71,9 @@ public class SendActivity extends AppCompatActivity {
     List<Events> event = new ArrayList<>();
     String getCheckBox;
 
+
+    Firebase ref;
+
     boolean isChecking = true;
     int mCheckedId = R.id.cbox_gorskoto;
 
@@ -74,18 +81,17 @@ public class SendActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_send);
-        ButterKnife.bind(this);
-
-        setChecked();
-
-        Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-        if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
-            startActivityForResult(takePictureIntent, CAPTURE_IMAGE_ACTIVITY_REQUEST_CODE);
-        }
-
-
         Firebase.setAndroidContext(this);
-        final Firebase ref = new Firebase(Config.FIREBASE_URL);
+        ButterKnife.bind(this);
+        ref = new Firebase(Config.FIREBASE_URL);
+        setChecked();
+        checkPermission();
+        getCameraIntent();
+
+
+
+
+
 
         btnSend.setOnClickListener(new View.OnClickListener() {
                                        @Override
@@ -102,51 +108,10 @@ public class SendActivity extends AppCompatActivity {
 
                                                if (imgBitmap != null) {
 
-                                                   Log.d(TAG, "Bitmap is not null !");
-                                                   ByteArrayOutputStream bos = new ByteArrayOutputStream();
-                                                   imgBitmap.compress(Bitmap.CompressFormat.PNG, 100, bos);
-                                                   byte[] data = bos.toByteArray();
-                                                   String base64 = Base64.encodeToString(data, Base64.DEFAULT);
-                                                   final Events events = new Events();
-                                                   events.setImg(base64);
-                                                   events.setLocation(edtTxtLocation.getText().toString());
-                                                   events.setDescription(edtTxtDescription.getText().toString());
-                                                   events.setOffice(getCheckBox());
-                                                   SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd_HHmmss");
-                                                   String currentDateandTime = sdf.format(new Date());
-
-                                                   ref.child(currentDateandTime).setValue(events);
-
-                                                   ref.addValueEventListener(new ValueEventListener() {
-                                                       @Override
-                                                       public void onDataChange(DataSnapshot snapshot) {
-                                                           Log.d(TAG, "onDataChange() " + snapshot);
-                                                           for (DataSnapshot postSnapshot : snapshot.getChildren()) {
-                                                               //Getting the data from snapshot
-                                                               event.add(postSnapshot.getValue(Events.class));
-                                                               //Adding it to a string
-                                                               String description = events.getDescription();
-                                                               String recievingString = events.getImg();
-                                                               byte[] decodedString = Base64.decode(recievingString, Base64.DEFAULT);
-                                                               Bitmap bmp = BitmapFactory.decodeByteArray(decodedString, 0, decodedString.length);
-//                                imgRecieve.setImageBitmap(bmp);
-                                                               //Displaying it on textview
-
-                                                           }
-                                                       }
-
-
-                                                       @Override
-                                                       public void onCancelled(FirebaseError firebaseError) {
-                                                           Log.e(TAG, "onCancelled() " + firebaseError.getMessage());
-                                                           System.out.println("The read failed: " + firebaseError.getMessage());
-                                                       }
-                                                   });
-
+                                                   makeFirebase();
 
                                                }
-                                           } else {
-                                               Toast.makeText(SendActivity.this, "No data", Toast.LENGTH_SHORT).show();
+
                                            }
 
 
@@ -269,5 +234,53 @@ public class SendActivity extends AppCompatActivity {
             Log.e("try", "catch");
             Toast.makeText(getApplicationContext(), "No email clients installed.", Toast.LENGTH_SHORT).show();
         }
+    }
+
+    public void getCameraIntent() {
+        Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
+            startActivityForResult(takePictureIntent, CAPTURE_IMAGE_ACTIVITY_REQUEST_CODE);
+        }
+    }
+
+    public void makeFirebase () {
+        Log.d(TAG, "Bitmap is not null !");
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        imgBitmap.compress(Bitmap.CompressFormat.PNG, 100, bos);
+        byte[] data = bos.toByteArray();
+        String base64 = Base64.encodeToString(data, Base64.DEFAULT);
+        final Events events = new Events();
+        events.setImg(base64);
+        events.setLocation(edtTxtLocation.getText().toString());
+        events.setDescription(edtTxtDescription.getText().toString());
+        events.setOffice(getCheckBox());
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd_HHmmss");
+        String currentDateandTime = sdf.format(new Date());
+
+        ref.child(currentDateandTime).setValue(events);
+    }
+    public boolean checkPermission() {
+        int permissionCheck =
+                ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA);
+
+        if (permissionCheck== PackageManager.PERMISSION_DENIED) {
+
+        if (ActivityCompat.shouldShowRequestPermissionRationale(this,
+                Manifest.permission.CAMERA)) {
+            Toast.makeText(SendActivity.this,
+                    "Meet Camera permission", Toast.LENGTH_SHORT).show();
+        } else {
+            requestCameraPermission();
+        }
+        return false;
+    } else {
+        return true;
+    }
+    }
+
+    private void requestCameraPermission() {
+        ActivityCompat
+                .requestPermissions(this, new String[]{Manifest.permission.CAMERA},
+                        1);
     }
 }
