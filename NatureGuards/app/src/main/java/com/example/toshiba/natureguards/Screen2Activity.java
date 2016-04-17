@@ -40,7 +40,10 @@ public class Screen2Activity extends AppCompatActivity implements View.OnClickLi
         setContentView(R.layout.activity_screen2);
         ButterKnife.bind(this);
         btnSendSignal.setOnClickListener(this);
+<<<<<<< HEAD
+=======
         btnPreview.setOnClickListener(this);
+>>>>>>> 09701293ed7925e5358fde970c9295c86321457e
 
 
     }
@@ -49,8 +52,11 @@ public class Screen2Activity extends AppCompatActivity implements View.OnClickLi
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.btn_preview:
+<<<<<<< HEAD
+=======
                 Intent previewIntent = new Intent(this, PreviewActivity.class);
                 startActivity(previewIntent);
+>>>>>>> 09701293ed7925e5358fde970c9295c86321457e
 
                 break;
             case R.id.btn_send_signal:
