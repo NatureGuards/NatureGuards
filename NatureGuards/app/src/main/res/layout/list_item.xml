@@ -7,6 +7,6 @@
         android:id="@+id/im_view"
         android:layout_width="110dp"
         android:layout_height="110dp"
-        android:src="@drawable/blue_forest"
+        android:src="@drawable/logo1"
         />
 </LinearLayout>

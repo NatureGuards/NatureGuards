@@ -143,7 +143,7 @@ public class SendActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 Log.d(TAG, "send clicked !");
-                if (isNetworkAvailable() == false) {
+                if (!isNetworkAvailable()) {
                     Toast.makeText(getApplicationContext(), "No Network Connection", Toast.LENGTH_LONG).show();
                 } else {
                     Log.d(TAG, "send clicked !");
@@ -202,7 +202,6 @@ public class SendActivity extends AppCompatActivity {
         }
     }
 
-    
     private boolean isNetworkAvailable() {
         ConnectivityManager connectivityManager
                 = (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE);

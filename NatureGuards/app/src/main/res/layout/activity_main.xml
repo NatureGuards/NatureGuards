@@ -3,21 +3,16 @@
     android:id="@+id/grp_splash"
     android:layout_width="match_parent"
     android:background="#fff"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    >
 
     <ImageView
         android:id="@+id/img_splash"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerInParent="true"
-        android:src="@drawable/pepi_proba"
+        android:src="@drawable/logo1"
         />
-    <ImageView
-        android:layout_below="@+id/img_splash"
-        android:id="@+id/img_text"
-        android:layout_width="128dp"
-        android:layout_height="64dp"
-        android:layout_centerInParent="true"
-        android:src="@drawable/header_logo" />
+
 
 </RelativeLayout>
