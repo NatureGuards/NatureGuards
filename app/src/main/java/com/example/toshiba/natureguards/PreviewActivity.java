@@ -27,27 +27,28 @@ public class PreviewActivity extends AppCompatActivity {
     RecyclerView recView;
     MyAdapter myAdapter;
     List<Events> event = new ArrayList<>();
+    public static final String TAG = "sdsd";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_preview2);
+
         ButterKnife.bind(this);
-        recView.setLayoutManager(new LinearLayoutManager(this));
-        Collections.reverse(event);
         myAdapter = new MyAdapter(event);
+        recView.setLayoutManager(new LinearLayoutManager(this));
         recView.setAdapter(myAdapter);
 
 
         Firebase.setAndroidContext(this);
         final Firebase ref = new Firebase(Config.FIREBASE_URL);
+
         ref.addValueEventListener(new ValueEventListener() {
-            public static final String TAG = "sdsd";
+
 
             @Override
             public void onDataChange(DataSnapshot snapshot) {
                 Log.d(TAG, "onDataChange() " + snapshot);
-                Events events = null;
                 for (DataSnapshot postSnapshot : snapshot.getChildren()) {
                     //Getting the data from snapshot
                     event.add(postSnapshot.getValue(Events.class));

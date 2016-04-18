@@ -41,11 +41,7 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.ViewHolder> {
         holder.txtDescription.setText(event.get(position).getDescription());
         holder.txtLocation.setText(event.get(position).getLocation());
         holder.txtOffice.setText(event.get(position).getOffice());
-
-        String recievingString = event.get(position).getImg();
-        byte[] decodedString = Base64.decode(recievingString, Base64.DEFAULT);
-        Bitmap bmp = BitmapFactory.decodeByteArray(decodedString, 0, decodedString.length);
-        holder.img.setImageBitmap(bmp);
+        holder.img.setImageBitmap(convertImage(position));
     }
 
     @Override
@@ -69,5 +65,10 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.ViewHolder> {
             ButterKnife.bind(this,itemView);
 
         }
+    }
+    public Bitmap convertImage(int position) {
+        String recievingString = event.get(position).getImg();
+        byte[] decodedString = Base64.decode(recievingString, Base64.DEFAULT);
+        return BitmapFactory.decodeByteArray(decodedString, 0, decodedString.length);
     }
 }

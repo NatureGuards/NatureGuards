@@ -56,8 +56,6 @@ public class SendActivity extends AppCompatActivity {
     Button btnSend;
     @Bind(R.id.img_send)
     ImageView imgSend;
-    //    @Bind(R.id.img_recieve)
-//    ImageView imgRecieve;
     @Bind(R.id.cbox_animals_protected)
     RadioButton cBoxAnimalProtected;
     @Bind(R.id.cbox_gorskoto)
@@ -81,42 +79,31 @@ public class SendActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_send);
+
         Firebase.setAndroidContext(this);
+
         ButterKnife.bind(this);
+
         ref = new Firebase(Config.FIREBASE_URL);
-        setChecked();
+
+        setCheckedBox();
         checkPermission();
         getCameraIntent();
-
-
-
-
-
 
         btnSend.setOnClickListener(new View.OnClickListener() {
                                        @Override
                                        public void onClick(View v) {
-
                                            if (checkData() == true) {
-                                               new Handler().postDelayed(new Runnable() {
-                                                   @Override
-                                                   public void run() {
-                                                       sendEmail();
-
-                                                   }
-                                               }, 500);
 
                                                if (imgBitmap != null) {
-
                                                    makeFirebase();
-
                                                }
 
+                                               Intent i = new Intent(SendActivity.this, Screen2Activity.class);
+                                               startActivity(i);
+
+                                               delaySendEmail();
                                            }
-
-
-                                           Intent i = new Intent(SendActivity.this, Screen2Activity.class);
-                                           startActivity(i);
                                        }
                                    }
 
@@ -127,7 +114,6 @@ public class SendActivity extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == CAPTURE_IMAGE_ACTIVITY_REQUEST_CODE && resultCode == RESULT_OK) {
-            Bundle extras = data.getExtras();
             imgBitmap = (Bitmap) data.getExtras().get("data");
             imgSend.setImageBitmap(imgBitmap);
         }
@@ -135,7 +121,6 @@ public class SendActivity extends AppCompatActivity {
 
     public boolean checkData() {
         boolean fl = true;
-
 
         if (edtTxtLocation.getText().toString().length() == 0) {
             edtTxtLocation.setError("location is required");
@@ -149,15 +134,9 @@ public class SendActivity extends AppCompatActivity {
                 !cBoxgrajdanska.isChecked() &&
                 !cBoxAnimalProtected.isChecked() &&
                 !cBoxOkolnaSreda.isChecked()) {
-            Toast.makeText(getApplicationContext(), "CHECK",
-                    Toast.LENGTH_LONG).show();
             fl = false;
         }
 
-        if (fl == true) {
-            Toast.makeText(getApplicationContext(), "send mail",
-                    Toast.LENGTH_LONG).show();
-        }
         return fl;
     }
 
@@ -177,7 +156,7 @@ public class SendActivity extends AppCompatActivity {
         return getCheckBox;
     }
 
-    public void setChecked() {
+    public void setCheckedBox() {
         first.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(RadioGroup group, int checkedId) {
@@ -205,7 +184,6 @@ public class SendActivity extends AppCompatActivity {
 
     public void sendEmail() {
         Intent emailIntent = new Intent(Intent.ACTION_SENDTO);
-        Toast.makeText(SendActivity.this, "get inside", Toast.LENGTH_SHORT).show();
         String recipient = "";
         if (cBoxGorskoto.isChecked()) {
             recipient = recipient + " lillymihailova@abv.bg,";
@@ -219,7 +197,7 @@ public class SendActivity extends AppCompatActivity {
         if (cBoxgrajdanska.isChecked()) {
             recipient = recipient + " sity_teh@abv.bg,";
         }
-//                    String text = location + "\n" + description;
+
 
         emailIntent.setData(Uri.parse("mailto:" + recipient));
 //                   emailIntent.putExtra(Intent.EXTRA_STREAM, );
@@ -243,7 +221,7 @@ public class SendActivity extends AppCompatActivity {
         }
     }
 
-    public void makeFirebase () {
+    public void makeFirebase() {
         Log.d(TAG, "Bitmap is not null !");
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
         imgBitmap.compress(Bitmap.CompressFormat.PNG, 100, bos);
@@ -259,23 +237,36 @@ public class SendActivity extends AppCompatActivity {
 
         ref.child(currentDateandTime).setValue(events);
     }
+
+    public void delaySendEmail() {
+
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                sendEmail();
+            }
+        }, 500);
+
+    }
+
+
     public boolean checkPermission() {
         int permissionCheck =
                 ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA);
 
-        if (permissionCheck== PackageManager.PERMISSION_DENIED) {
+        if (permissionCheck == PackageManager.PERMISSION_DENIED) {
 
-        if (ActivityCompat.shouldShowRequestPermissionRationale(this,
-                Manifest.permission.CAMERA)) {
-            Toast.makeText(SendActivity.this,
-                    "Meet Camera permission", Toast.LENGTH_SHORT).show();
+            if (ActivityCompat.shouldShowRequestPermissionRationale(this,
+                    Manifest.permission.CAMERA)) {
+                Toast.makeText(SendActivity.this,
+                        "Meet Camera permission", Toast.LENGTH_SHORT).show();
+            } else {
+                requestCameraPermission();
+            }
+            return false;
         } else {
-            requestCameraPermission();
+            return true;
         }
-        return false;
-    } else {
-        return true;
-    }
     }
 
     private void requestCameraPermission() {
@@ -283,4 +274,5 @@ public class SendActivity extends AppCompatActivity {
                 .requestPermissions(this, new String[]{Manifest.permission.CAMERA},
                         1);
     }
+
 }
