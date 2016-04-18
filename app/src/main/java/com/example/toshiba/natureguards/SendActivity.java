@@ -7,6 +7,8 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Environment;
 import android.os.Handler;
@@ -93,7 +95,10 @@ public class SendActivity extends AppCompatActivity {
         btnSend.setOnClickListener(new View.OnClickListener() {
                                        @Override
                                        public void onClick(View v) {
-                                           if (checkData() == true) {
+
+                                           if (isNetworkAvailable() == false) {
+                                               Toast.makeText(getApplicationContext(), "No Network Connection", Toast.LENGTH_LONG).show();
+                                           } else if (checkData() == true) {
 
                                                if (imgBitmap != null) {
                                                    makeFirebase();
@@ -249,6 +254,12 @@ public class SendActivity extends AppCompatActivity {
 
     }
 
+    private boolean isNetworkAvailable() {
+        ConnectivityManager connectivityManager
+                = (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
+        return activeNetworkInfo != null && activeNetworkInfo.isConnected();
+    }
 
     public boolean checkPermission() {
         int permissionCheck =

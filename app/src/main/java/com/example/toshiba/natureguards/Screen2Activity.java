@@ -4,6 +4,8 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
@@ -49,8 +51,12 @@ public class Screen2Activity extends AppCompatActivity implements View.OnClickLi
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.btn_preview:
-                Intent previewIntent = new Intent(this, PreviewActivity.class);
-                startActivity(previewIntent);
+                if (isNetworkAvailable() == false) {
+                                  Toast.makeText(getApplicationContext(), "No Network Connection", Toast.LENGTH_LONG).show();
+                                    } else {
+                                        Intent previewIntent = new Intent(this, PreviewActivity.class);
+                                        startActivity(previewIntent);
+                                    }
 
                 break;
             case R.id.btn_send_signal:
@@ -61,6 +67,11 @@ public class Screen2Activity extends AppCompatActivity implements View.OnClickLi
         }
     }
 
-
+    private boolean isNetworkAvailable() {
+           ConnectivityManager connectivityManager
+                        = (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE);
+                NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
+                return activeNetworkInfo != null && activeNetworkInfo.isConnected();
+        }
 
 }
